@@ -1,3 +1,0 @@
-/home/muhammet/CLionProjects/Block_designs_v_AlgorithmX/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/muhammet/CLionProjects/Block_designs_v_AlgorithmX/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/muhammet/CLionProjects/Block_designs_v_AlgorithmX/cmake-build-debug/CMakeFiles/Block_designs_v_AlgorithmX.dir
