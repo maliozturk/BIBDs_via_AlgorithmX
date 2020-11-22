@@ -1,4 +1,5 @@
-## Efficient algorithm for finding block designs for given parameters (v, k)
+
+## Efficient c++ code to find block designs for given parameters (v, k)
 My purpose of writing this code was generating Balanced Incomplete Block Designs (BIBD)s for given parameters (v, k, λ) using Donald Knuth's Algorithm X.
 Current version of code is only working for λ == 1 and shall be improved to generate designs for λ>1 aswell. Still, making this code work on c++ was an accomplishment for me.
 

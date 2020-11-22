@@ -38,16 +38,11 @@ void cover(struct Node *targetNode)
 {
     struct Node *row, *rightNode;
 
-    // get the pointer to the header of column
-    // to which this node belong
     struct Node *colNode = targetNode->column;
 
-    // unlink column header from it's neighbors
     colNode->left->right = colNode->right;
     colNode->right->left = colNode->left;
 
-    // Move down the column and remove each row
-    // by traversing right
     for(row = colNode->down; row != colNode; row = row->down)
     {
         for(rightNode = row->right; rightNode != row;
@@ -56,8 +51,6 @@ void cover(struct Node *targetNode)
             rightNode->up->down = rightNode->down;
             rightNode->down->up = rightNode->up;
 
-            // after unlinking row node, decrement the
-            // node count in column header
             Matrix[0][rightNode->colID].nodeCount -= 1;
         }
     }
@@ -67,12 +60,8 @@ void uncover(struct Node *targetNode)
 {
     struct Node *rowNode, *leftNode;
 
-    // get the pointer to the header of column
-    // to which this node belong
     struct Node *colNode = targetNode->column;
 
-    // Move down the column and link back
-    // each row by traversing left
     for(rowNode = colNode->up; rowNode != colNode; rowNode = rowNode->up)
     {
         for(leftNode = rowNode->left; leftNode != rowNode;
@@ -81,13 +70,10 @@ void uncover(struct Node *targetNode)
             leftNode->up->down = leftNode;
             leftNode->down->up = leftNode;
 
-            // after linking row node, increment the
-            // node count in column header
             Matrix[0][leftNode->colID].nodeCount += 1;
         }
     }
 
-    // link the column header from it's neighbors
     colNode->left->right = colNode;
     colNode->right->left = colNode;
 }
@@ -132,19 +118,14 @@ void search(int k)
     struct Node *rightNode;
     struct Node *leftNode;
     struct Node *column;
-    // if no column left, then we must
-    // have found the solution
     if(header->right == header)
     {
         SOLUTION_COUNT++;
-        /*plus_Sol_Count();*/
         return;
     }
 
-    // choose column deterministically
     column = getMinColumn();
 
-    // cover chosen column
     cover(column);
 
     for(rowNode = column->down; rowNode != column;
@@ -156,11 +137,8 @@ void search(int k)
             rightNode = rightNode->right)
             cover(rightNode);
 
-        // move to level k+1 (recursively)
         search(k+1);
 
-        // if solution in not possible, backtrack (uncover)
-        // and remove the selected row (set) from solution
         solutions.pop_back();
 
         column = rowNode->column;
@@ -187,49 +165,34 @@ void fillProbMat(std::vector<std::vector<int>> arrays){
 
 Node *createToridolMatrix()
 {
-    // One extra row for list header nodes
-    // for each column
     for(int i = 0; i <= nRow; i++)
     {
         for(int j = 0; j < nCol; j++)
         {
-            // If it's 1 in the problem matrix then
-            // only create a node
             if(ProbMat[i][j])
             {
                 int a, b;
 
-                // If it's 1, other than 1 in 0th row
-                // then count it as node of column
-                // and increment node count in column header
                 if(i) Matrix[0][j].nodeCount += 1;
 
-                // Add pointer to column header for this
-                // column node
                 Matrix[i][j].column = &Matrix[0][j];
 
-                // set row and column id of this node
                 Matrix[i][j].rowID = i;
                 Matrix[i][j].colID = j;
 
-                // Link the node with neighbors
 
-                // Left pointer
                 a = i; b = j;
                 do{ b = getLeft(b); } while(!ProbMat[a][b] && b != j);
                 Matrix[i][j].left = &Matrix[i][b];
 
-                // Right pointer
                 a = i; b = j;
                 do { b = getRight(b); } while(!ProbMat[a][b] && b != j);
                 Matrix[i][j].right = &Matrix[i][b];
 
-                // Up pointer
                 a = i; b = j;
                 do { a = getUp(a); } while(!ProbMat[a][b] && a != i);
                 Matrix[i][j].up = &Matrix[a][j];
 
-                // Down pointer
                 a = i; b = j;
                 do { a = getDown(a); } while(!ProbMat[a][b] && a != i);
                 Matrix[i][j].down = &Matrix[a][j];
@@ -237,12 +200,8 @@ Node *createToridolMatrix()
         }
     }
 
-    // link header right pointer to column
-    // header of first column
     header->right = &Matrix[0][0];
 
-    // link header left pointer to column
-    // header of last column
     header->left = &Matrix[0][nCol-1];
 
     Matrix[0][0].left = header;
@@ -259,8 +218,6 @@ void findSolutions(int starting_point, int nr, int nc, const std::vector<std::ve
     {
         for(int j=0; j<nCol; j++)
         {
-            // if it's row 0, it consist of column
-            // headers. Initialize it with 1
             if(i == 0) ProbMat[i][j] = true;
             else ProbMat[i][j] = false;
         }
