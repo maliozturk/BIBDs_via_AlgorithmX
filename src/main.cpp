@@ -2,13 +2,17 @@
 #include "vector"
 #include "Combinations.h"
 #include "IncidenceMatrix.h"
+#include "fstream"
+#include <pthread.h>
+#include <cstdlib>
+#include "Graph.h"
 
 #define MAX_ROW 1000
 #define MAX_COL 1000
+#define NUM_THREADS 8
 bool ProbMat[MAX_ROW][MAX_COL];
 
-struct Node
-{
+struct Node {
 public:
     struct Node *left;
     struct Node *right;
@@ -24,18 +28,20 @@ struct Node *header = new Node();
 
 struct Node Matrix[MAX_ROW][MAX_COL];
 
-std::vector <struct Node*> solutions;
+std::vector<struct Node *> solutions;
 
-int nRow = 0,nCol = 0;
+int nRow = 0, nCol = 0;
 
 
-int getRight(int i){return (i+1) % nCol; }
-int getLeft(int i){return (i-1 < 0) ? nCol-1 : i-1 ; }
-int getUp(int i){return (i-1 < 0) ? nRow : i-1 ; }
-int getDown(int i){return (i+1) % (nRow+1); }
+int getRight(int i) { return (i + 1) % nCol; }
 
-void cover(struct Node *targetNode)
-{
+int getLeft(int i) { return (i - 1 < 0) ? nCol - 1 : i - 1; }
+
+int getUp(int i) { return (i - 1 < 0) ? nRow : i - 1; }
+
+int getDown(int i) { return (i + 1) % (nRow + 1); }
+
+void cover(struct Node *targetNode) {
     struct Node *row, *rightNode;
 
     struct Node *colNode = targetNode->column;
@@ -43,11 +49,9 @@ void cover(struct Node *targetNode)
     colNode->left->right = colNode->right;
     colNode->right->left = colNode->left;
 
-    for(row = colNode->down; row != colNode; row = row->down)
-    {
-        for(rightNode = row->right; rightNode != row;
-            rightNode = rightNode->right)
-        {
+    for (row = colNode->down; row != colNode; row = row->down) {
+        for (rightNode = row->right; rightNode != row;
+             rightNode = rightNode->right) {
             rightNode->up->down = rightNode->down;
             rightNode->down->up = rightNode->up;
 
@@ -56,17 +60,14 @@ void cover(struct Node *targetNode)
     }
 }
 
-void uncover(struct Node *targetNode)
-{
+void uncover(struct Node *targetNode) {
     struct Node *rowNode, *leftNode;
 
     struct Node *colNode = targetNode->column;
 
-    for(rowNode = colNode->up; rowNode != colNode; rowNode = rowNode->up)
-    {
-        for(leftNode = rowNode->left; leftNode != rowNode;
-            leftNode = leftNode->left)
-        {
+    for (rowNode = colNode->up; rowNode != colNode; rowNode = rowNode->up) {
+        for (leftNode = rowNode->left; leftNode != rowNode;
+             leftNode = leftNode->left) {
             leftNode->up->down = leftNode;
             leftNode->down->up = leftNode;
 
@@ -78,24 +79,22 @@ void uncover(struct Node *targetNode)
     colNode->right->left = colNode;
 }
 
-Node *getMinColumn()
-{
+Node *getMinColumn() {
     struct Node *h = header;
     struct Node *min_col = h->right;
     h = h->right->right;
-    do
-    {
-        if(h->nodeCount < min_col->nodeCount)
-        {
+    do {
+        if (h->nodeCount < min_col->nodeCount) {
             min_col = h;
         }
         h = h->right;
-    }while(h != header);
+    } while (h != header);
 
     return min_col;
 };
 
 double SOLUTION_COUNT = 0;
+
 /*
 void plus_Sol_Count()
 {
@@ -112,14 +111,12 @@ void plus_Sol_Count()
 
 }
 */
-void search(int k)
-{
+void search(int k) {
     struct Node *rowNode;
     struct Node *rightNode;
     struct Node *leftNode;
     struct Node *column;
-    if(header->right == header)
-    {
+    if (header->right == header) {
         SOLUTION_COUNT++;
         return;
     }
@@ -128,52 +125,47 @@ void search(int k)
 
     cover(column);
 
-    for(rowNode = column->down; rowNode != column;
-        rowNode = rowNode->down )
-    {
+    for (rowNode = column->down; rowNode != column;
+         rowNode = rowNode->down) {
         solutions.push_back(rowNode);
 
-        for(rightNode = rowNode->right; rightNode != rowNode;
-            rightNode = rightNode->right)
+        for (rightNode = rowNode->right; rightNode != rowNode;
+             rightNode = rightNode->right)
             cover(rightNode);
 
-        search(k+1);
+        search(k + 1);
 
         solutions.pop_back();
 
         column = rowNode->column;
-        for(leftNode = rowNode->left; leftNode != rowNode;
-            leftNode = leftNode->left)
+        for (leftNode = rowNode->left; leftNode != rowNode;
+             leftNode = leftNode->left)
             uncover(leftNode);
     }
 
     uncover(column);
 }
 
-void fillProbMat(std::vector<std::vector<int>> arrays){
+void fillProbMat(std::vector<std::vector<int>> arrays) {
     std::vector<std::vector<int>>::iterator row;
     std::vector<int>::iterator col;
     int r = 0;
-    for(row=arrays.begin(); row!= arrays.end(); row++){
+    for (row = arrays.begin(); row != arrays.end(); row++) {
         r++;
-        for(col=row->begin(); col!= row->end(); col++){
+        for (col = row->begin(); col != row->end(); col++) {
             ProbMat[r][*col - 1] = true;
         };
 
     };
 };
 
-Node *createToridolMatrix()
-{
-    for(int i = 0; i <= nRow; i++)
-    {
-        for(int j = 0; j < nCol; j++)
-        {
-            if(ProbMat[i][j])
-            {
+Node *createToridolMatrix() {
+    for (int i = 0; i <= nRow; i++) {
+        for (int j = 0; j < nCol; j++) {
+            if (ProbMat[i][j]) {
                 int a, b;
 
-                if(i) Matrix[0][j].nodeCount += 1;
+                if (i) Matrix[0][j].nodeCount += 1;
 
                 Matrix[i][j].column = &Matrix[0][j];
 
@@ -181,20 +173,24 @@ Node *createToridolMatrix()
                 Matrix[i][j].colID = j;
 
 
-                a = i; b = j;
-                do{ b = getLeft(b); } while(!ProbMat[a][b] && b != j);
+                a = i;
+                b = j;
+                do { b = getLeft(b); } while (!ProbMat[a][b] && b != j);
                 Matrix[i][j].left = &Matrix[i][b];
 
-                a = i; b = j;
-                do { b = getRight(b); } while(!ProbMat[a][b] && b != j);
+                a = i;
+                b = j;
+                do { b = getRight(b); } while (!ProbMat[a][b] && b != j);
                 Matrix[i][j].right = &Matrix[i][b];
 
-                a = i; b = j;
-                do { a = getUp(a); } while(!ProbMat[a][b] && a != i);
+                a = i;
+                b = j;
+                do { a = getUp(a); } while (!ProbMat[a][b] && a != i);
                 Matrix[i][j].up = &Matrix[a][j];
 
-                a = i; b = j;
-                do { a = getDown(a); } while(!ProbMat[a][b] && a != i);
+                a = i;
+                b = j;
+                do { a = getDown(a); } while (!ProbMat[a][b] && a != i);
                 Matrix[i][j].down = &Matrix[a][j];
             }
         }
@@ -202,23 +198,21 @@ Node *createToridolMatrix()
 
     header->right = &Matrix[0][0];
 
-    header->left = &Matrix[0][nCol-1];
+    header->left = &Matrix[0][nCol - 1];
 
     Matrix[0][0].left = header;
-    Matrix[0][nCol-1].right = header;
+    Matrix[0][nCol - 1].right = header;
     return header;
 }
 
 
-void findSolutions(int starting_point, int nr, int nc, const std::vector<std::vector<int>>& given_array){
+void findSolutions(int starting_point, int nr, int nc, const std::vector<std::vector<int>> &given_array) {
     nRow = nr;
     nCol = nc;
 
-    for(int i=0; i<=nRow; i++)
-    {
-        for(int j=0; j<nCol; j++)
-        {
-            if(i == 0) ProbMat[i][j] = true;
+    for (int i = 0; i <= nRow; i++) {
+        for (int j = 0; j < nCol; j++) {
+            if (i == 0) ProbMat[i][j] = true;
             else ProbMat[i][j] = false;
         }
     }
@@ -226,11 +220,12 @@ void findSolutions(int starting_point, int nr, int nc, const std::vector<std::ve
     createToridolMatrix();
     search(starting_point);
 }
-void getDesign_of_Solution(const std::vector<int>& nds, std::vector<std::vector<int>> design, int k){
-    for(int i: nds){
+
+void getDesign_of_Solution(const std::vector<int> &nds, std::vector<std::vector<int>> design, int k) {
+    for (int i: nds) {
         std::cout << "[";
-        for(int j=0;j<k;j++){
-            if(j==k-1)
+        for (int j = 0; j < k; j++) {
+            if (j == k - 1)
                 std::cout << design[i][j];
             else
                 std::cout << design[i][j] << ",";
@@ -240,18 +235,65 @@ void getDesign_of_Solution(const std::vector<int>& nds, std::vector<std::vector<
 };
 
 
-void solve_design_problem(int v, int k){
-    std::vector<std::vector<int>> pairs = Combinations::combs(v,2);
+void solve_design_problem(std::vector<int> vKlets) {
+    int v = vKlets[0];
+    int k = vKlets[1];
+    std::vector<std::vector<int>> pairs = Combinations::combs(v, 2);
     std::vector<std::vector<int>> combs = Combinations::combs(v, k);
-    std::vector<std::vector<int>> Inc_Matrix = IncidenceMatrix::getIncidenceMatrix(combs,pairs);
+    std::vector<std::vector<int>> Inc_Matrix = IncidenceMatrix::getIncidenceMatrix(combs, pairs);
     std::vector<std::vector<int>> Design = IncidenceMatrix::getSets(Inc_Matrix);
-    findSolutions(0,combs.size(),pairs.size(),Design);
+    findSolutions(0, combs.size(), pairs.size(), Design);
 }
 
+
+
 int main() {
-    int v = 13;
-    int k = 4;
-    solve_design_problem(v, k);
-    std::cout << SOLUTION_COUNT << " solutions found for " <<"("<<v<<","<<k<<",1)"<<" design.";
+    std::vector<std::vector<int>> todo_list;
+    // Add values {v,k}s to solve them.
+    /*  Find Solutions Part ********
+    for(int v=6;v<=13; v++) {
+        for(int k=3; k<=4; k++){
+            todo_list.push_back({v,k});
+        }
+    }
+    for(auto& todo:todo_list){
+        SOLUTION_COUNT = 0;
+        solve_design_problem(todo);
+        std::ofstream myFile;
+        myFile.open("results.txt", std::ios_base::app);
+        myFile << SOLUTION_COUNT << " solutions found for " <<"("<<todo[0]<<","<<todo[1]<<",1)"<<" design.\n";
+        myFile.close();
+        std::cout << SOLUTION_COUNT << " solutions found for " <<"("<<todo[0]<<","<<todo[1]<<",1)"<<" design."<<std::endl;
+    }
+    ***********************/
+
+
+    // Testing graph with seven point plane example:
+    std::vector<int> P = {1,2,3,4,5,6,7};
+    std::vector<std::vector<int>> B = {{1,2,4},{2,3,5},{3,4,6},{4,5,7},{5,6,1},{6,7,2},{7,1,3}};
+    Graph g = Graph(P,B);
+    g.drawGraph();
+    std::cout << "Points in graph: ";
+    for(int i:g._points){
+        std::cout << i << " ";
+    }
+    std::cout << "\n";
+    std::cout << "Blocks in graph: ";
+    for(auto s: g._blocks){
+        for(auto i:s){
+            std::cout << i << " ";
+        }
+        std::cout << ",  ";
+    }
+    std::cout << "\n";
+    std::cout << "Adjacency list of graph:\n";
+    for(auto edge: g._edges){
+        std::cout << edge.node << "-";
+        for(auto j:edge.Block){
+            std::cout << j << " ";
+        }
+        std::cout << "\n";
+    }
+
     return 0;
 }

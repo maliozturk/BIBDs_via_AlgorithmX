@@ -6,6 +6,7 @@
 #include "algorithm"
 #include "Combinations.h"
 
+
 std::vector<std::vector<int>> Combinations::combs(int n, int r) {
     std::vector<bool> v(n);
     std::fill(v.end() - r, v.end(), true);
