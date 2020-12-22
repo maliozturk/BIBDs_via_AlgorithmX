@@ -269,31 +269,27 @@ int main() {
 
 
     // Testing graph with seven point plane example:
-    std::vector<int> P = {1,2,3,4,5,6,7};
-    std::vector<std::vector<int>> B = {{1,2,4},{2,3,5},{3,4,6},{4,5,7},{5,6,1},{6,7,2},{7,1,3}};
-    Graph g = Graph(P,B);
-    g.drawGraph();
-    std::cout << "Points in graph: ";
-    for(int i:g._points){
-        std::cout << i << " ";
+    std::vector<int> P = {0,1,2,3,4,5,6};
+    std::vector<std::vector<int>> B = {{0,1,3},{1,2,4},{2,3,5},{3,4,6},{4,5,0},{5,6,1},{6,0,2}};
+
+    std::vector<Vertice> vertices;
+    for(auto i:P){
+        Vertice a;
+        a.id = i;
+        vertices.push_back(a);
     }
-    std::cout << "\n";
-    std::cout << "Blocks in graph: ";
-    for(auto s: g._blocks){
-        for(auto i:s){
+    Graph graph_adj_to_nodes = Graph(vertices,B);
+
+    std::cout << "Vertices in graph:";
+    for(const auto& vertice: graph_adj_to_nodes.Vertices){
+        std::cout << vertice.id << ",";
+    }
+    std::cout << "\nEdges in graph (Not Directed):\n";
+    for(auto edge: graph_adj_to_nodes.Edges){
+        for(int i:edge){
             std::cout << i << " ";
-        }
-        std::cout << ",  ";
-    }
-    std::cout << "\n";
-    std::cout << "Adjacency list of graph:\n";
-    for(auto edge: g._edges){
-        std::cout << edge.node << "-";
-        for(auto j:edge.Block){
-            std::cout << j << " ";
         }
         std::cout << "\n";
     }
-
     return 0;
 }
