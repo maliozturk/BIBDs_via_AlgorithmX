@@ -6,6 +6,7 @@
 #define BLOCK_DESIGNS_V_ALGORITHMX_ALGORITHMX_H
 #define MAX_ROW 1000
 #define MAX_COL 1000
+#include <string>
 
 struct Node {
 public:
@@ -109,6 +110,7 @@ public:
         struct Node *column;
         if (header->right == header) {
             SOLUTION_COUNT++;
+            write_solution_to_file(7, 3);
             return;
         }
 
@@ -208,6 +210,24 @@ public:
         std::vector<std::vector<int>> Design = IncidenceMatrix::getSets(Inc_Matrix);
         findSolutions(0, combs.size(), pairs.size(), Design);
     }
+
+    static void write_solution_to_file(int v, int k)
+    {
+        std::ofstream myFile;
+        myFile.open(std::to_string(v)+"_"+std::to_string(k)+"_1_BIBDs.txt", std::ios_base::app);
+        
+        std::vector<std::vector<int>> combs = Combinations::combs(v,k);
+        
+        std::vector<struct Node*>::iterator i;
+        for(i = solutions.begin(); i!=solutions.end(); i++) {
+            int val = (*i)->rowID;
+            myFile << val << " ";
+        }
+        myFile << "\n";
+        myFile.close();
+        
+    }
+
 };
 
 #endif //BLOCK_DESIGNS_V_ALGORITHMX_ALGORITHMX_H
