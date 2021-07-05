@@ -13,7 +13,8 @@ int main() {
     /// Add values {v,k}s to todo_list to find {v,k,1}-designs.
 
     todo_list.push_back({7,3});
-
+    todo_list.push_back({11,4});
+    todo_list.push_back({13,4});
     // todo_list.push_back({13,4});
 
     for(auto& todo:todo_list){

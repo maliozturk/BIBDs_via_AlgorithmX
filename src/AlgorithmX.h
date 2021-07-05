@@ -110,7 +110,7 @@ public:
         struct Node *column;
         if (header->right == header) {
             SOLUTION_COUNT++;
-            write_solution_to_file(7, 3);
+            //write_solution_to_file(7, 3);
             return;
         }
 
